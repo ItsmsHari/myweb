@@ -1,0 +1,454 @@
+================================================================================
+                    PERFORMANCE & FUNCTIONAL TESTING GUIDE
+                              NextGen Web Application
+================================================================================
+
+## PART 1: PERFORMANCE TESTING
+
+### 1.1 Overview
+Performance testing measures how a system performs under load, including response 
+time, throughput, resource utilization, and stability.
+
+### 1.2 Types of Performance Testing
+
+1. LOAD TESTING
+   - Objective: Measure system behavior under expected loads
+   - Scenarios:
+     * Normal load: 50 concurrent users for 10 minutes
+     * Peak load: 200 concurrent users for 15 minutes
+   - Metrics: Response time, throughput, CPU, memory usage
+   - Tools: JMeter, LoadRunner, Locust
+
+2. STRESS TESTING
+   - Objective: Find breaking point of the system
+   - Scenarios:
+     * Gradually increase users from 100 to 1000+
+     * Monitor failure points
+   - Expected outcome: Identify maximum capacity
+
+3. ENDURANCE TESTING
+   - Objective: Detect memory leaks and degradation over time
+   - Duration: 24-48 hours of continuous load
+   - Monitoring: Memory, CPU, disk usage patterns
+
+4. SPIKE TESTING
+   - Objective: Test sudden load increases
+   - Scenario: Jump from 50 to 500 users instantly
+   - Verify: System recovery after spike
+
+5. VOLUME TESTING
+   - Objective: Test with large datasets
+   - Scenarios:
+     * Database with 1M+ records
+     * Large file uploads/downloads
+     * Batch processing operations
+
+### 1.3 Performance Metrics
+
+Response Time Metrics:
+  - Average Response Time (Target: < 2 seconds)
+  - 95th Percentile (Target: < 5 seconds)
+  - 99th Percentile (Target: < 10 seconds)
+  - Min/Max Response Time
+
+Throughput Metrics:
+  - Requests Per Second (RPS) - Target: > 100 RPS
+  - Transactions Per Second (TPS)
+  - Data Throughput (KB/s)
+
+Resource Utilization:
+  - CPU Usage (Target: < 80%)
+  - Memory Usage (Target: < 75%)
+  - Disk I/O (Read/Write operations)
+  - Network Bandwidth
+
+Reliability Metrics:
+  - Error Rate (Target: < 1%)
+  - Success Rate (Target: > 99%)
+  - Availability (Target: > 99.5%)
+  - Time to First Byte (TTFB)
+
+### 1.4 Performance Testing Prerequisites
+
+Technical Requirements:
+  ✓ Production-like test environment
+  ✓ Realistic test data (minimum 1M records)
+  ✓ Monitoring infrastructure (Prometheus, Grafana)
+  ✓ Load generation tools installed
+  ✓ Database backups ready
+  ✓ Application performance baseline established
+  ✓ Server/Application restart procedures documented
+
+Tools & Software:
+  ✓ Apache JMeter 5.4+
+  ✓ Prometheus & Grafana
+  ✓ Java 8+ with SpringBoot
+  ✓ Git for version control
+  ✓ Docker (optional, for containerization)
+
+Infrastructure:
+  ✓ Test Server: 4+ CPU cores, 8+ GB RAM
+  ✓ Load Generator: Separate machine
+  ✓ Database: Production replica
+  ✓ Isolated network with consistent bandwidth
+
+### 1.5 Performance Test Execution Plan
+
+Phase 1: Baseline Testing (Week 1)
+  - Establish current performance metrics
+  - Document baseline performance
+  - Identify quick wins for optimization
+
+Phase 2: Load & Stress Testing (Week 2)
+  - Execute load test scenarios
+  - Identify breaking points
+  - Collect detailed metrics and logs
+
+Phase 3: Endurance Testing (Week 3)
+  - Run 24-48 hour endurance tests
+  - Monitor for memory leaks
+  - Check for performance degradation
+
+Phase 4: Analysis & Optimization (Week 4)
+  - Analyze results
+  - Implement optimizations
+  - Re-test to validate improvements
+
+### 1.6 Performance Test Cases for MyWeb Application
+
+API Endpoints to Test:
+  GET  /calculator/add?a=5&b=3
+  GET  /calculator/subtract?a=5&b=3
+  POST /calculator/calculate (with JSON body)
+  GET  /api/health
+  GET  /api/status
+  POST /api/login
+  GET  /api/users (list all users)
+
+Resource-Intensive Operations:
+  - File uploads (1MB to 1GB)
+  - File downloads
+  - Report generation
+  - Batch calculations
+  - Database queries with large result sets
+
+### 1.7 Performance Acceptance Criteria
+  ✅ Average response time ≤ 2 seconds
+  ✅ 95th percentile response time ≤ 5 seconds
+  ✅ Error rate < 1%
+  ✅ Throughput ≥ 100 RPS
+  ✅ CPU utilization < 80% at peak load
+  ✅ No memory leaks during endurance test
+  ✅ Application recovers from spike loads
+  ✅ Availability > 99.5%
+
+================================================================================
+
+## PART 2: FUNCTIONAL TESTING
+
+### 2.1 Overview
+Functional testing verifies that the application behaves as expected according 
+to functional requirements and specifications.
+
+### 2.2 Types of Functional Testing
+
+1. UNIT TESTING
+   - Objective: Test individual methods/functions
+   - Scope: Single unit of code
+   - Framework: JUnit 4/5, TestNG
+   - Example: Test Calculator.add() method
+   - Coverage Target: > 80%
+
+2. INTEGRATION TESTING
+   - Objective: Test interactions between modules
+   - Scope: Multiple components working together
+   - Focus: Data flow between components
+   - Example: Calculator + Database + API layer
+
+3. SYSTEM TESTING
+   - Objective: Test complete system as a whole
+   - Scope: Entire application end-to-end
+   - Environment: Test environment matching production
+   - Validates: All functional requirements
+
+4. REGRESSION TESTING
+   - Objective: Ensure new changes don't break existing features
+   - Trigger: After each code change
+   - Scope: Automated test suite
+   - Tools: Selenium, JUnit, TestNG
+
+5. USER ACCEPTANCE TESTING (UAT)
+   - Objective: Verify system meets business requirements
+   - Participants: Business users, stakeholders
+   - Scenarios: Real-world use cases
+   - Duration: Before production deployment
+
+### 2.3 Functional Testing Tools
+
+Java Testing Frameworks:
+  - JUnit 4/5 (Unit testing)
+  - TestNG (Advanced unit testing)
+  - Mockito (Mocking framework)
+  - PowerMock (Static method mocking)
+
+Web/API Testing:
+  - Selenium (UI automation)
+  - RestAssured (REST API testing)
+  - Cucumber (BDD testing)
+
+### 2.4 Functional Testing Prerequisites
+
+Development Environment:
+  ✓ JDK 8 or higher installed
+  ✓ Maven or Gradle build tool
+  ✓ IDE: IntelliJ IDEA or Eclipse
+  ✓ Git repository with project code
+  ✓ Test database with sample data
+
+Testing Frameworks & Libraries:
+  ✓ JUnit 4.12+ or JUnit 5.x
+  ✓ TestNG 7.x
+  ✓ Mockito 3.x
+  ✓ RestAssured 4.x
+  ✓ Selenium 3.x (for UI testing)
+
+Test Data Requirements:
+  ✓ Valid test data prepared
+  ✓ Invalid/edge case data prepared
+  ✓ Database fixtures ready
+  ✓ API test data defined
+
+Documentation:
+  ✓ Functional requirements documented
+  ✓ Test cases written and reviewed
+  ✓ API specifications documented
+  ✓ Business rules documented
+  ✓ Known issues documented
+
+### 2.5 Functional Test Cases for MyWeb Application
+
+Calculator Functionality Tests:
+  TEST: testAddition()
+    Input: a=5, b=3
+    Expected Output: 8
+    
+  TEST: testSubtraction()
+    Input: a=5, b=3
+    Expected Output: 2
+    
+  TEST: testMultiplication()
+    Input: a=5, b=3
+    Expected Output: 15
+    
+  TEST: testDivision()
+    Input: a=10, b=2
+    Expected Output: 5
+    
+  TEST: testDivisionByZero()
+    Input: a=5, b=0
+    Expected: Exception thrown (ArithmeticException)
+
+API Tests:
+  TEST: testGetHealthEndpoint()
+    Endpoint: GET /api/health
+    Expected: 200 OK, {"status": "UP"}
+    
+  TEST: testCalculatorAPI()
+    Endpoint: POST /calculator/calculate
+    Body: {"operation": "add", "a": 5, "b": 3}
+    Expected: 200 OK, {"result": 8}
+    
+  TEST: testUnauthorizedAccess()
+    Endpoint: GET /api/protected
+    Headers: No auth token
+    Expected: 401 Unauthorized
+
+Login/Authentication Tests:
+  TEST: testValidLogin()
+    Username: valid_user
+    Password: correct_password
+    Expected: 200 OK, JWT token returned
+    
+  TEST: testInvalidPassword()
+    Username: valid_user
+    Password: wrong_password
+    Expected: 401 Unauthorized
+    
+  TEST: testUserNotFound()
+    Username: nonexistent_user
+    Password: any_password
+    Expected: 404 Not Found
+
+### 2.6 Functional Test Example (JUnit)
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class CalculatorTest {
+    
+    private Calculator calculator = new Calculator();
+    
+    @Test
+    public void testAddition() {
+        int result = calculator.add(5, 3);
+        assertEquals(8, result, "5 + 3 should equal 8");
+    }
+    
+    @Test
+    public void testSubtraction() {
+        int result = calculator.subtract(5, 3);
+        assertEquals(2, result, "5 - 3 should equal 2");
+    }
+    
+    @Test
+    public void testDivisionByZero() {
+        assertThrows(ArithmeticException.class, () -> {
+            calculator.divide(5, 0);
+        });
+    }
+}
+```
+
+### 2.7 Functional Testing Execution Plan
+
+Phase 1: Test Case Preparation (Week 1)
+  - Write unit tests for all methods
+  - Review and approve test cases
+  - Prepare test data
+  - Set up test environment
+
+Phase 2: Unit Testing (Week 2)
+  - Execute unit tests
+  - Achieve > 80% code coverage
+  - Fix failing tests
+  - Document defects
+
+Phase 3: Integration Testing (Week 3)
+  - Test module interactions
+  - Test database connectivity
+  - Test API endpoints
+  - Verify data flow
+
+Phase 4: System & UAT Testing (Week 4)
+  - End-to-end system testing
+  - User acceptance testing
+  - Performance validation
+  - Documentation and sign-off
+
+### 2.8 Functional Acceptance Criteria
+  ✅ All unit tests pass (100% pass rate)
+  ✅ Code coverage > 80%
+  ✅ All integration tests pass
+  ✅ All critical bugs fixed
+  ✅ All API endpoints working correctly
+  ✅ Database operations working correctly
+  ✅ Authentication/Authorization working
+  ✅ Business rules verified
+  ✅ UAT approved by business users
+
+### 2.9 Functional Testing Best Practices
+  - Write tests before or with code (TDD)
+  - Use meaningful test names
+  - Keep tests independent and isolated
+  - Mock external dependencies
+  - Use test fixtures for setup/teardown
+  - Maintain test data carefully
+  - Run tests frequently (CI/CD)
+  - Document test results
+  - Track defects properly
+
+================================================================================
+
+## PART 3: COMBINED TESTING STRATEGY
+
+### 3.1 Testing Timeline
+
+Week 1:
+  - Performance: Baseline testing setup
+  - Functional: Test case preparation & unit tests
+  
+Week 2:
+  - Performance: Load & stress testing
+  - Functional: Integration testing
+  
+Week 3:
+  - Performance: Endurance testing
+  - Functional: System testing
+  
+Week 4:
+  - Performance: Analysis & optimization
+  - Functional: UAT & sign-off
+
+### 3.2 Success Metrics
+
+Performance Success:
+  ✅ Response time targets met
+  ✅ Throughput targets achieved
+  ✅ No critical memory leaks
+  ✅ Resource utilization within limits
+  ✅ System recovers from failures
+
+Functional Success:
+  ✅ 100% of critical functions working
+  ✅ Code coverage > 80%
+  ✅ All defects fixed
+  ✅ Business requirements verified
+  ✅ User acceptance obtained
+
+### 3.3 CI/CD Integration
+
+GitHub Actions Integration:
+  - Run functional tests on every commit
+  - Run performance tests on release branch
+  - Generate coverage reports
+  - Archive test results
+  - Notify team of failures
+
+================================================================================
+
+## PART 4: TOOLS & COMMANDS
+
+### Performance Testing with JMeter
+
+Installation:
+  1. Download JMeter from https://jmeter.apache.org/
+  2. Extract to local directory
+  3. Run: jmeter.bat (Windows)
+
+Basic Test Plan:
+  1. Create Thread Group (number of users)
+  2. Add HTTP Sampler (target URL)
+  3. Add Listeners (View Results Tree, Aggregate Report)
+  4. Configure Ramp-up and Duration
+  5. Run test and analyze results
+
+### Functional Testing with JUnit
+
+Run tests via Maven:
+  mvn clean test
+  mvn test -Dtest=CalculatorTest
+  mvn test -Dtest=CalculatorTest#testAddition
+
+Run tests via Gradle:
+  gradle test
+  gradle test --tests CalculatorTest
+  gradle test --tests CalculatorTest.testAddition
+
+### Code Coverage with JaCoCo
+
+Generate coverage report:
+  mvn clean test jacoco:report
+  
+View report:
+  target/site/jacoco/index.html
+
+================================================================================
+
+Document Version: 1.0
+Created: May 9, 2026
+Last Updated: May 9, 2026
+Author: QA Team
+Status: Active
+
+================================================================================
