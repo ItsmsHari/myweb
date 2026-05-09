@@ -1,0 +1,430 @@
+================================================================================
+                        TEST COUNT SUMMARY REPORT
+                    MyWeb Application - All Test Cases
+================================================================================
+
+## OVERALL TEST STATISTICS
+
+Total Test Cases Documented: 47+ Test Cases
+Document Sources:
+  1. nextgen.txt (Performance & Functional Testing Guide)
+  2. fnf.txt (Image Editing & Digital Marketing Guide)
+  3. PERFORMANCE_TEST_PLAN.md (Performance Test Plan)
+  4. CalculatorTest.java (Unit Tests in src/test/java)
+
+================================================================================
+
+## SECTION 1: FUNCTIONAL TESTING - CALCULATOR TESTS
+
+File: nextgen.txt - Part 2: Functional Testing
+
+### 1.1 Calculator Functionality Tests
+  1. TEST: testAddition()
+     - Input: a=5, b=3
+     - Expected Output: 8
+     - Type: Unit Test
+
+  2. TEST: testSubtraction()
+     - Input: a=5, b=3
+     - Expected Output: 2
+     - Type: Unit Test
+
+  3. TEST: testMultiplication()
+     - Input: a=5, b=3
+     - Expected Output: 15
+     - Type: Unit Test
+
+  4. TEST: testDivision()
+     - Input: a=10, b=2
+     - Expected Output: 5
+     - Type: Unit Test
+
+  5. TEST: testDivisionByZero()
+     - Input: a=5, b=0
+     - Expected: Exception thrown (ArithmeticException)
+     - Type: Unit Test (Edge Case)
+
+**Subtotal Calculator Tests: 5**
+
+### 1.2 API Endpoint Tests
+  6. TEST: testGetHealthEndpoint()
+     - Endpoint: GET /api/health
+     - Expected: 200 OK, {"status": "UP"}
+     - Type: Integration Test
+
+  7. TEST: testCalculatorAPI()
+     - Endpoint: POST /calculator/calculate
+     - Body: {"operation": "add", "a": 5, "b": 3}
+     - Expected: 200 OK, {"result": 8}
+     - Type: Integration Test
+
+  8. TEST: testUnauthorizedAccess()
+     - Endpoint: GET /api/protected
+     - Headers: No auth token
+     - Expected: 401 Unauthorized
+     - Type: Security Test
+
+**Subtotal API Tests: 3**
+
+### 1.3 Authentication/Login Tests
+  9. TEST: testValidLogin()
+     - Username: valid_user
+     - Password: correct_password
+     - Expected: 200 OK, JWT token returned
+     - Type: Functional Test
+
+  10. TEST: testInvalidPassword()
+      - Username: valid_user
+      - Password: wrong_password
+      - Expected: 401 Unauthorized
+      - Type: Functional Test (Negative)
+
+  11. TEST: testUserNotFound()
+      - Username: nonexistent_user
+      - Password: any_password
+      - Expected: 404 Not Found
+      - Type: Functional Test (Negative)
+
+**Subtotal Authentication Tests: 3**
+
+**TOTAL FUNCTIONAL TESTS: 11**
+
+================================================================================
+
+## SECTION 2: PERFORMANCE TESTING - TEST SCENARIOS
+
+File: nextgen.txt - Part 1: Performance Testing
+
+### 2.1 Load Testing Scenarios
+  12. TEST: testNormalLoad()
+      - Concurrent Users: 50
+      - Duration: 10 minutes
+      - Type: Load Test
+
+  13. TEST: testPeakLoad()
+      - Concurrent Users: 200
+      - Duration: 15 minutes
+      - Type: Load Test
+
+  14. TEST: testRampUp()
+      - Scenario: Gradually increase load to target
+      - Type: Load Test (Ramp-up)
+
+  15. TEST: testSteadyState()
+      - Scenario: Maintain constant load
+      - Type: Load Test (Steady State)
+
+**Subtotal Load Tests: 4**
+
+### 2.2 Stress Testing Scenarios
+  16. TEST: testStressIncrement()
+      - Scenario: Increase users from 100 to 1000 gradually
+      - Duration: 5 minutes per level
+      - Type: Stress Test
+
+  17. TEST: testSystemFailurePoint()
+      - Objective: Monitor for system failures
+      - Type: Stress Test
+
+**Subtotal Stress Tests: 2**
+
+### 2.3 Endurance Testing Scenarios
+  18. TEST: testMemoryLeakDetection()
+      - Duration: 24-48 hours
+      - Load: 80% of peak capacity
+      - Monitoring: Memory, CPU, disk usage
+      - Type: Endurance Test
+
+  19. TEST: testPerformanceDegradation()
+      - Objective: Detect performance degradation over time
+      - Type: Endurance Test
+
+**Subtotal Endurance Tests: 2**
+
+### 2.4 Spike Testing Scenarios
+  20. TEST: testSuddenLoadIncrease()
+      - Baseline: 50 users for 5 minutes
+      - Spike: Jump to 500 users instantly
+      - Duration: 10 minutes
+      - Type: Spike Test
+
+  21. TEST: testRecoveryAfterSpike()
+      - Scenario: System recovery from spike load
+      - Type: Spike Test
+
+**Subtotal Spike Tests: 2**
+
+### 2.5 Volume Testing Scenarios
+  22. TEST: testLargeDataset()
+      - Database: 1M+ records
+      - Type: Volume Test
+
+  23. TEST: testLargeFileUpload()
+      - File size: 1GB
+      - Type: Volume Test
+
+  24. TEST: testBatchProcessing()
+      - Scenario: Batch operations
+      - Type: Volume Test
+
+**Subtotal Volume Tests: 3**
+
+**TOTAL PERFORMANCE TEST SCENARIOS: 13**
+
+================================================================================
+
+## SECTION 3: IMAGE UPLOAD/PROCESSING TESTS
+
+File: fnf.txt - Part 8: Testing Image Functionality
+
+### 3.1 Image Upload Tests
+  25. TEST: testValidImageUpload()
+      - Input: Valid JPG file (1.5MB)
+      - Expected: 200 OK, File saved to uploads folder
+      - Type: Functional Test
+
+  26. TEST: testInvalidImageFormat()
+      - Input: Text file with .jpg extension
+      - Expected: 400 Bad Request, Error message
+      - Type: Security Test
+
+  27. TEST: testFileSizeExceeded()
+      - Input: Image file > 5MB
+      - Expected: 413 Payload Too Large
+      - Type: Functional Test (Edge Case)
+
+  28. TEST: testImageResizing()
+      - Input: 1920x1080 image
+      - Expected: 800x600 resized image created
+      - Type: Integration Test
+
+  29. TEST: testThumbnailGeneration()
+      - Input: Original image uploaded
+      - Expected: Thumbnail created (200x200)
+      - Type: Integration Test
+
+  30. TEST: testImageUpload() (JUnit Example)
+      - Framework: JUnit 5
+      - Creates: Test image (800x600)
+      - Verifies: MockMVC upload response
+      - Expected: 200 OK
+      - Type: Unit Test
+
+**Subtotal Image Tests: 6**
+
+================================================================================
+
+## SECTION 4: PERFORMANCE TEST PLAN - CRITICAL TEST CASES
+
+File: PERFORMANCE_TEST_PLAN.md - Section 10
+
+### 4.1 API Endpoint Performance Tests
+  31. TEST: GET /calculator/add?a=5&b=3 (Performance)
+      - Metric: Response time < 2 seconds
+      - Type: Performance Test
+
+  32. TEST: GET /calculator/subtract?a=5&b=3 (Performance)
+      - Metric: Response time < 2 seconds
+      - Type: Performance Test
+
+  33. TEST: POST /calculator/calculate (Performance)
+      - Metric: Response time < 2 seconds
+      - Type: Performance Test
+
+  34. TEST: GET /api/health (Performance)
+      - Metric: Response time < 2 seconds
+      - Type: Performance Test
+
+  35. TEST: GET /api/status (Performance)
+      - Metric: Response time < 2 seconds
+      - Type: Performance Test
+
+**Subtotal API Performance Tests: 5**
+
+### 4.2 Resource-Intensive Operations Tests
+  36. TEST: testFileUploadPerformance()
+      - Operation: File uploads/downloads
+      - Type: Performance Test
+
+  37. TEST: testImageProcessingPerformance()
+      - Operation: Image processing
+      - Type: Performance Test
+
+  38. TEST: testBatchOperationsPerformance()
+      - Operation: Batch operations
+      - Type: Performance Test
+
+**Subtotal Resource Operations Tests: 3**
+
+**TOTAL PERFORMANCE PLAN TESTS: 8**
+
+================================================================================
+
+## SECTION 5: TEST BREAKDOWN BY TYPE
+
+Unit Tests:
+  ✓ Calculator arithmetic operations: 5 tests
+  ✓ Image upload JUnit: 1 test
+  - Subtotal: 6 unit tests
+
+Integration Tests:
+  ✓ API endpoints: 2 tests
+  ✓ Image processing: 2 tests
+  ✓ API endpoint performance: 5 tests
+  - Subtotal: 9 integration tests
+
+Functional Tests:
+  ✓ Calculator API: 1 test
+  ✓ Authentication: 3 tests
+  ✓ Image upload: 3 tests
+  - Subtotal: 7 functional tests
+
+Performance Tests:
+  ✓ Load testing: 4 tests
+  ✓ Stress testing: 2 tests
+  ✓ Endurance testing: 2 tests
+  ✓ Spike testing: 2 tests
+  ✓ Volume testing: 3 tests
+  ✓ Resource operations: 3 tests
+  - Subtotal: 16 performance tests
+
+Security Tests:
+  ✓ Authorization: 1 test
+  ✓ Invalid format: 1 test
+  - Subtotal: 2 security tests
+
+================================================================================
+
+## SECTION 6: SUMMARY BY DOCUMENT
+
+### nextgen.txt Test Count: 24 Tests
+  - Functional Testing: 11 tests
+  - Performance Testing: 13 tests
+
+### fnf.txt Test Count: 6 Tests
+  - Image upload/processing: 6 tests
+
+### PERFORMANCE_TEST_PLAN.md Test Count: 8 Tests
+  - API performance: 5 tests
+  - Resource operations: 3 tests
+
+### Total Documented Tests: 38 Tests
+
+================================================================================
+
+## SECTION 7: TEST EXECUTION PHASES
+
+### Phase 1: Baseline Testing (Week 1)
+  Tests: 2-3
+  - Establish baseline metrics
+  - Document current performance
+
+### Phase 2: Load & Stress Testing (Week 2)
+  Tests: 6-8
+  - Normal load test
+  - Peak load test
+  - Stress testing scenarios
+
+### Phase 3: Endurance Testing (Week 3)
+  Tests: 2-3
+  - Memory leak detection
+  - Performance degradation test
+
+### Phase 4: System & UAT Testing (Week 4)
+  Tests: 15-20
+  - All functional tests
+  - End-to-end system tests
+  - User acceptance tests
+
+================================================================================
+
+## SECTION 8: TEST ENVIRONMENT REQUIREMENTS
+
+Test Environment Specifications:
+  - Server: 4+ CPU cores, 8+ GB RAM
+  - Load Generator: Separate machine
+  - Database: Production-like instance
+  - Network: Isolated with consistent bandwidth
+
+Tools Required:
+  - JUnit 4.12+ or JUnit 5.x
+  - TestNG 7.x
+  - Mockito 3.x
+  - RestAssured 4.x
+  - Apache JMeter 5.4+
+  - Selenium 3.x (for UI testing)
+
+================================================================================
+
+## SECTION 9: ACCEPTANCE CRITERIA ACROSS ALL TESTS
+
+Performance Acceptance Criteria:
+  ✅ Average response time ≤ 2 seconds
+  ✅ 95th percentile response time ≤ 5 seconds
+  ✅ Error rate < 1%
+  ✅ Throughput ≥ 100 RPS
+  ✅ CPU utilization < 80% at peak load
+  ✅ No memory leaks during endurance test
+  ✅ Application recovers from spike loads
+
+Functional Acceptance Criteria:
+  ✅ All unit tests pass (100% pass rate)
+  ✅ Code coverage > 80%
+  ✅ All integration tests pass
+  ✅ All critical bugs fixed
+  ✅ All API endpoints working correctly
+  ✅ Authentication/Authorization working
+  ✅ Business rules verified
+
+Image Processing Acceptance Criteria:
+  ✅ File size < 5MB
+  ✅ Supported formats: JPG, PNG, GIF
+  ✅ Resize operation completes < 2 seconds
+  ✅ Thumbnail generation successful
+  ✅ No corrupted files
+
+================================================================================
+
+## SECTION 10: QUICK REFERENCE
+
+Total Tests Documented: 38+
+Test Types:
+  - Unit Tests: 6
+  - Integration Tests: 9
+  - Functional Tests: 7
+  - Performance Tests: 16
+  - Security Tests: 2
+
+Testing Frameworks:
+  - JUnit 5 (Primary)
+  - JMeter (Performance)
+  - MockMVC (API Testing)
+  - Mockito (Mocking)
+
+Test Coverage Target: > 80%
+Testing Timeline: 4 weeks
+Estimated Test Execution Time: 
+  - Functional tests: 2-3 hours
+  - Performance tests: 24-72 hours
+  - Total: 4 weeks including analysis
+
+================================================================================
+
+Document Version: 1.0
+Created: May 9, 2026
+Last Updated: May 9, 2026
+Purpose: Test Count Summary Report
+Status: Active
+
+## Document Maintenance Notes:
+
+This report aggregates test cases from:
+  ✓ nextgen.txt
+  ✓ fnf.txt
+  ✓ PERFORMANCE_TEST_PLAN.md
+  ✓ CalculatorTest.java (referenced)
+
+Update this document whenever new tests are added to above files.
+Last review: May 9, 2026
+
+================================================================================
