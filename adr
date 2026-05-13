@@ -1,0 +1,1110 @@
+================================================================================
+                        DEPLOYMENT GUIDE
+                    MyWeb Application Deployment Procedures
+================================================================================
+
+## TABLE OF CONTENTS
+1. Deployment Overview
+2. Pre-Deployment Checklist
+3. Local Development Setup
+4. Build & Package
+5. Testing Before Deployment
+6. Deployment Environments
+7. Deployment Procedures
+8. Docker Deployment
+9. Kubernetes Deployment
+10. CI/CD Pipeline (Jenkins/GitHub Actions)
+11. Monitoring & Verification
+12. Rollback Procedures
+13. Troubleshooting
+
+================================================================================
+
+## 1. DEPLOYMENT OVERVIEW
+
+### 1.1 Deployment Environments
+
+Development Environment:
+  - Purpose: Local development and testing
+  - Server: Local machine (Windows/Mac/Linux)
+  - Database: Local database or H2
+  - Access: Developer only
+
+Testing/QA Environment:
+  - Purpose: Pre-production testing
+  - Server: Test server
+  - Database: Test database (similar to production)
+  - Access: QA team
+
+Staging Environment:
+  - Purpose: Final validation before production
+  - Server: Staging server (same config as production)
+  - Database: Production-like database
+  - Access: Limited team members
+
+Production Environment:
+  - Purpose: Live application for end users
+  - Server: Production server(s)
+  - Database: Production database
+  - Access: Limited admin access only
+
+### 1.2 Deployment Strategies
+
+Blue-Green Deployment:
+  - Two identical production environments (Blue & Green)
+  - Deploy to inactive environment
+  - Switch traffic to new version
+  - Advantage: Zero downtime, easy rollback
+
+Rolling Deployment:
+  - Gradually replace instances
+  - Update 1 server at a time
+  - Advantage: No downtime, gradual deployment
+  - Disadvantage: Complex monitoring
+
+Canary Deployment:
+  - Deploy to small percentage of users first
+  - Gradually increase traffic
+  - Advantage: Risk reduction, early issue detection
+
+Recreate Deployment:
+  - Stop old version, deploy new version
+  - Advantage: Simple
+  - Disadvantage: Downtime required
+
+================================================================================
+
+## 2. PRE-DEPLOYMENT CHECKLIST
+
+### 2.1 Code Checklist
+  ☐ Code review completed
+  ☐ All tests passed (unit, integration, functional)
+  ☐ Code quality checks passed (SonarQube)
+  ☐ No critical security vulnerabilities
+  ☐ Version number updated
+  ☐ CHANGELOG updated
+  ☐ Documentation updated
+  ☐ Dependencies updated and secured
+  ☐ No hardcoded credentials
+  ☐ Error handling implemented
+
+### 2.2 Testing Checklist
+  ☐ Unit tests: 100% pass rate
+  ☐ Integration tests: 100% pass rate
+  ☐ Performance tests: Baseline met
+  ☐ Security tests: No critical issues
+  ☐ Smoke tests: Executed successfully
+  ☐ UAT: Approved by business
+  ☐ Load testing: Passed (if applicable)
+  ☐ Regression testing: Completed
+
+### 2.3 Infrastructure Checklist
+  ☐ Deployment server(s) ready
+  ☐ Database backups created
+  ☐ Database schema changes prepared (migrations)
+  ☐ SSL certificates valid
+  ☐ DNS records configured
+  ☐ Load balancer configured
+  ☐ Monitoring tools configured
+  ☐ Logging aggregation ready
+  ☐ Backup and recovery plan ready
+  ☐ Disaster recovery tested
+
+### 2.4 Documentation Checklist
+  ☐ Deployment procedure documented
+  ☐ Configuration documented
+  ☐ Rollback procedure documented
+  ☐ Known issues documented
+  ☐ Monitoring dashboard created
+  ☐ Alert thresholds configured
+  ☐ Support team briefed
+  ☐ Change log entry created
+
+### 2.5 Security Checklist
+  ☐ Security assessment completed
+  ☐ Penetration testing passed
+  ☐ OWASP compliance verified
+  ☐ Data encryption enabled
+  ☐ Access control implemented
+  ☐ API authentication/authorization working
+  ☐ Secrets management configured
+  ☐ GDPR/CCPA compliance verified
+
+================================================================================
+
+## 3. LOCAL DEVELOPMENT SETUP
+
+### 3.1 Prerequisites
+
+Software Requirements:
+  - Java JDK 8+ (OpenJDK or Oracle JDK)
+  - Maven 3.6+ or Gradle 6+
+  - Git 2.25+
+  - Docker & Docker Compose (for containerized dev)
+  - PostgreSQL/MySQL (for database)
+  - IDE: IntelliJ IDEA or Eclipse
+
+Installation Steps:
+
+1. Install Java JDK:
+   Windows:
+     - Download from https://adoptopenjdk.net/
+     - Run installer
+     - Set JAVA_HOME environment variable
+     - Verify: java -version
+
+   Linux (Ubuntu):
+     sudo apt update
+     sudo apt install openjdk-11-jdk
+     java -version
+
+2. Install Maven:
+   Windows:
+     - Download from https://maven.apache.org/
+     - Extract to C:\Program Files\apache-maven
+     - Add M2_HOME and PATH environment variable
+     - Verify: mvn -version
+
+   Linux:
+     sudo apt install maven
+     mvn -version
+
+3. Clone Repository:
+   git clone https://github.com/yourrepo/myweb.git
+   cd myweb
+
+4. Build Project:
+   mvn clean install
+   mvn clean package
+
+### 3.2 Database Setup (Local)
+
+PostgreSQL Setup:
+  1. Install PostgreSQL (https://www.postgresql.org/download/)
+  2. Create database:
+     createdb myweb_dev
+  3. Create user:
+     psql -U postgres
+     CREATE USER myweb_user WITH PASSWORD 'password123';
+     ALTER ROLE myweb_user SET client_encoding TO 'utf8';
+     ALTER ROLE myweb_user SET default_transaction_isolation TO 'read committed';
+     ALTER ROLE myweb_user SET default_transaction_deferrable TO on;
+     ALTER ROLE myweb_user SET timezone TO 'UTC';
+     GRANT ALL PRIVILEGES ON DATABASE myweb_dev TO myweb_user;
+
+### 3.3 Application Configuration (Local)
+
+Create application.properties or application.yml:
+
+```properties
+# application.properties
+spring.application.name=myweb
+spring.profiles.active=dev
+
+# Database Configuration
+spring.datasource.url=jdbc:postgresql://localhost:5432/myweb_dev
+spring.datasource.username=myweb_user
+spring.datasource.password=password123
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Server Configuration
+server.port=8080
+server.servlet.context-path=/api
+
+# Logging
+logging.level.root=INFO
+logging.level.com.javahome.myweb=DEBUG
+
+# JWT Configuration
+app.jwt.secret=your-secret-key-here
+app.jwt.expiration=86400000
+
+# Mail Configuration
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-app-password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+
+### 3.4 Run Application Locally
+
+```bash
+# Using Maven
+mvn spring-boot:run
+
+# Using JAR file
+java -jar target/myweb-1.0.0.jar
+
+# Using IDE
+- Right click project > Run As > Spring Boot App
+```
+
+Access Application:
+  - URL: http://localhost:8080/api
+  - Health Check: http://localhost:8080/api/health
+
+================================================================================
+
+## 4. BUILD & PACKAGE
+
+### 4.1 Maven Build Process
+
+Clean and Build:
+```bash
+# Clean previous builds
+mvn clean
+
+# Compile code
+mvn compile
+
+# Run tests
+mvn test
+
+# Package application
+mvn package
+
+# Skip tests during package
+mvn package -DskipTests
+
+# Full process
+mvn clean package
+```
+
+Build Outputs:
+  - JAR file: target/myweb-1.0.0.jar
+  - WAR file: target/myweb-1.0.0.war (if configured)
+  - Test reports: target/surefire-reports/
+
+### 4.2 Versioning
+
+Version Format: MAJOR.MINOR.PATCH
+  - MAJOR: Significant changes, breaking changes
+  - MINOR: New features, backward compatible
+  - PATCH: Bug fixes, patches
+
+Update Version in pom.xml:
+```xml
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.javahome</groupId>
+    <artifactId>myweb</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+</project>
+```
+
+Git Tagging:
+```bash
+# Create version tag
+git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Push tag to remote
+git push origin v1.0.0
+```
+
+### 4.3 Artifact Management
+
+Nexus Repository Setup:
+```xml
+<!-- pom.xml -->
+<distributionManagement>
+    <repository>
+        <id>nexus-releases</id>
+        <url>http://nexus-server:8081/nexus/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+        <id>nexus-snapshots</id>
+        <url>http://nexus-server:8081/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
+</distributionManagement>
+```
+
+Deploy to Nexus:
+```bash
+mvn deploy
+```
+
+================================================================================
+
+## 5. TESTING BEFORE DEPLOYMENT
+
+### 5.1 Pre-Deployment Testing
+
+Smoke Testing:
+```bash
+# Run smoke tests
+mvn test -Dtest=SmokeTest
+
+# Basic health check
+curl http://localhost:8080/api/health
+```
+
+Regression Testing:
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=CalculatorTest
+```
+
+Performance Testing:
+```bash
+# Run JMeter tests
+jmeter -n -t performance-test.jmx -l results.jtl -j jmeter.log
+```
+
+### 5.2 Integration Testing
+
+Integration Tests:
+```bash
+# Run integration tests
+mvn verify
+
+# Run with specific profile
+mvn verify -Pintegration-tests
+```
+
+### 5.3 Manual Testing
+
+Critical Path Testing:
+  ✓ User login flow
+  ✓ Calculator operations
+  ✓ File upload
+  ✓ API endpoints
+  ✓ Error handling
+  ✓ Database transactions
+
+================================================================================
+
+## 6. DEPLOYMENT ENVIRONMENTS
+
+### 6.1 Development Environment
+
+Configuration:
+  - Database: H2 (in-memory) or PostgreSQL local
+  - Cache: No caching
+  - Logging: DEBUG level
+  - Auto-reload: Enabled
+  - Security: Basic/disabled for dev
+
+### 6.2 Testing/QA Environment
+
+Configuration:
+  - Database: PostgreSQL (test data)
+  - Server: test-server.example.com
+  - Port: 8080
+  - SSL: Disabled
+  - Logging: INFO level
+
+### 6.3 Staging Environment
+
+Configuration:
+  - Database: PostgreSQL (staging data)
+  - Server: staging-server.example.com
+  - Port: 443 (HTTPS)
+  - SSL: Enabled
+  - Logging: INFO level
+  - Monitoring: Enabled
+
+### 6.4 Production Environment
+
+Configuration:
+  - Database: PostgreSQL cluster
+  - Server: prod-server.example.com
+  - Port: 443 (HTTPS only)
+  - SSL: Enabled with auto-renewal
+  - Logging: WARN/ERROR level
+  - Monitoring: Full monitoring
+  - Backup: Automatic daily backups
+  - Redundancy: Load balancer with multiple instances
+
+================================================================================
+
+## 7. DEPLOYMENT PROCEDURES
+
+### 7.1 Traditional WAR/JAR Deployment (Tomcat)
+
+Step 1: Build Application
+```bash
+cd /home/deployer/myweb
+git pull origin master
+mvn clean package
+```
+
+Step 2: Backup Current Version
+```bash
+cp /opt/tomcat/webapps/myweb.war /backup/myweb-$(date +%Y%m%d-%H%M%S).war
+```
+
+Step 3: Stop Tomcat
+```bash
+/opt/tomcat/bin/shutdown.sh
+```
+
+Step 4: Deploy New Version
+```bash
+cp target/myweb-1.0.0.war /opt/tomcat/webapps/myweb.war
+```
+
+Step 5: Update Configuration (if needed)
+```bash
+cp config/application-prod.properties /opt/tomcat/conf/myweb.properties
+```
+
+Step 6: Start Tomcat
+```bash
+/opt/tomcat/bin/startup.sh
+```
+
+Step 7: Verify Deployment
+```bash
+# Check logs
+tail -f /opt/tomcat/logs/catalina.out
+
+# Health check
+curl https://prod-server.example.com/api/health
+
+# Verify functionality
+# ... perform smoke tests
+```
+
+### 7.2 Spring Boot JAR Deployment
+
+Step 1: Create Deployment Directory
+```bash
+mkdir -p /opt/myweb/{app,logs,config}
+cd /opt/myweb
+```
+
+Step 2: Copy Application
+```bash
+cp /home/deployer/myweb/target/myweb-1.0.0.jar app/
+cp config/application-prod.properties config/
+```
+
+Step 3: Create systemd Service File
+```bash
+# /etc/systemd/system/myweb.service
+
+[Unit]
+Description=MyWeb Application
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/opt/myweb
+ExecStart=/usr/bin/java -Xmx512m -jar app/myweb-1.0.0.jar \
+    --spring.config.location=/opt/myweb/config/application-prod.properties
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Step 4: Enable and Start Service
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable myweb
+sudo systemctl start myweb
+sudo systemctl status myweb
+```
+
+Step 5: Monitor Application
+```bash
+# Check service status
+sudo systemctl status myweb
+
+# View logs
+sudo journalctl -u myweb -f
+
+# Check if running
+ps aux | grep myweb
+```
+
+### 7.3 Blue-Green Deployment
+
+Preparation:
+  1. Prepare two identical production servers (Blue & Green)
+  2. Blue: Current production version
+  3. Green: New version (ready to deploy)
+
+Deployment Steps:
+  1. Deploy new version to Green server
+  2. Run smoke tests on Green
+  3. If tests pass:
+     - Switch load balancer traffic to Green
+     - Monitor Green for issues
+     - Keep Blue as rollback option
+  4. If issues detected:
+     - Switch back to Blue
+     - Fix issues
+     - Redeploy to Green
+
+Benefits:
+  ✓ Zero downtime deployment
+  ✓ Easy rollback
+  ✓ Full environment testing before cutover
+
+================================================================================
+
+## 8. DOCKER DEPLOYMENT
+
+### 8.1 Docker Setup
+
+Dockerfile:
+```dockerfile
+# Multi-stage build
+FROM maven:3.8.1-openjdk-11 AS builder
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+FROM openjdk:11-jre-slim
+WORKDIR /app
+COPY --from=builder /app/target/myweb-1.0.0.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+### 8.2 Building Docker Image
+
+```bash
+# Build image
+docker build -t myweb:1.0.0 .
+
+# Tag image
+docker tag myweb:1.0.0 myregistry.azurecr.io/myweb:1.0.0
+
+# Push to registry
+docker push myregistry.azurecr.io/myweb:1.0.0
+```
+
+### 8.3 Running Docker Container
+
+```bash
+# Run container
+docker run -d \
+  --name myweb \
+  -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/myweb \
+  -e SPRING_DATASOURCE_USERNAME=myweb_user \
+  -e SPRING_DATASOURCE_PASSWORD=password123 \
+  myweb:1.0.0
+
+# Check logs
+docker logs -f myweb
+
+# Stop container
+docker stop myweb
+
+# Remove container
+docker rm myweb
+```
+
+### 8.4 Docker Compose
+
+docker-compose.yml:
+```yaml
+version: '3.8'
+
+services:
+  myweb:
+    image: myweb:1.0.0
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/myweb
+      SPRING_DATASOURCE_USERNAME: myweb_user
+      SPRING_DATASOURCE_PASSWORD: password123
+    depends_on:
+      - db
+    networks:
+      - myweb-network
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: myweb
+      POSTGRES_USER: myweb_user
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - myweb-network
+
+volumes:
+  postgres_data:
+
+networks:
+  myweb-network:
+    driver: bridge
+```
+
+Deploy with Docker Compose:
+```bash
+# Start services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f myweb
+
+# Stop services
+docker-compose down
+```
+
+================================================================================
+
+## 9. KUBERNETES DEPLOYMENT
+
+### 9.1 Kubernetes Setup
+
+Prerequisites:
+  - Kubernetes cluster (minikube, EKS, GKE, AKS)
+  - kubectl CLI installed
+  - Docker image pushed to registry
+
+### 9.2 Kubernetes Manifests
+
+Deployment.yaml:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myweb
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myweb
+  template:
+    metadata:
+      labels:
+        app: myweb
+    spec:
+      containers:
+      - name: myweb
+        image: myregistry.azurecr.io/myweb:1.0.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: myweb-secret
+              key: db-url
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: myweb-secret
+              key: db-user
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myweb-secret
+              key: db-password
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+```
+
+Service.yaml:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myweb-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: myweb
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+```
+
+### 9.3 Deploy to Kubernetes
+
+```bash
+# Create namespace
+kubectl create namespace myweb
+
+# Create secrets
+kubectl create secret generic myweb-secret \
+  --from-literal=db-url=jdbc:postgresql://db:5432/myweb \
+  --from-literal=db-user=myweb_user \
+  --from-literal=db-password=password123 \
+  -n myweb
+
+# Deploy application
+kubectl apply -f deployment.yaml -n myweb
+kubectl apply -f service.yaml -n myweb
+
+# Check deployment status
+kubectl get deployments -n myweb
+kubectl get pods -n myweb
+kubectl get services -n myweb
+
+# View logs
+kubectl logs -f deployment/myweb -n myweb
+
+# Scale deployment
+kubectl scale deployment myweb --replicas=5 -n myweb
+
+# Update image (rolling update)
+kubectl set image deployment/myweb \
+  myweb=myregistry.azurecr.io/myweb:1.0.1 -n myweb
+```
+
+================================================================================
+
+## 10. CI/CD PIPELINE (Jenkins/GitHub Actions)
+
+### 10.1 GitHub Actions Workflow
+
+.github/workflows/deploy.yml:
+```yaml
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+
+    - name: Build with Maven
+      run: mvn clean package
+
+    - name: Run Tests
+      run: mvn test
+
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Build Docker Image
+      run: |
+        docker build -t myweb:${{ github.sha }} .
+        docker tag myweb:${{ github.sha }} myweb:latest
+
+    - name: Push to Registry
+      run: |
+        docker login -u ${{ secrets.REGISTRY_USERNAME }} \
+          -p ${{ secrets.REGISTRY_PASSWORD }}
+        docker push myweb:${{ github.sha }}
+
+    - name: Deploy to Production
+      if: github.ref == 'refs/heads/master'
+      run: |
+        kubectl set image deployment/myweb \
+          myweb=myweb:${{ github.sha }} -n myweb
+```
+
+### 10.2 Jenkins Pipeline
+
+Jenkinsfile:
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = 'myregistry.azurecr.io'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Code Quality') {
+            steps {
+                sh 'mvn sonar:sonar'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${REGISTRY}/myweb:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                script {
+                    sh "docker push ${REGISTRY}/myweb:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    sh "kubectl set image deployment/myweb myweb=${REGISTRY}/myweb:${IMAGE_TAG} -n myweb"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            junit '**/target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/*.jar'
+        }
+    }
+}
+```
+
+================================================================================
+
+## 11. MONITORING & VERIFICATION
+
+### 11.1 Post-Deployment Verification
+
+Immediate Checks (First 5 minutes):
+  ☐ Application started successfully
+  ☐ Health endpoint responding (200 OK)
+  ☐ Database connectivity verified
+  ☐ Application logs show no errors
+  ☐ No spike in error rates
+
+Functional Verification:
+  ☐ Calculator endpoints working
+  ☐ API authentication working
+  ☐ User login successful
+  ☐ File upload functionality working
+  ☐ Database operations successful
+
+### 11.2 Monitoring Setup
+
+Application Monitoring:
+```bash
+# Check application is running
+curl https://prod.example.com/api/health
+
+# Check response time
+curl -w "Time: %{time_total}s\n" https://prod.example.com/api/health
+
+# Monitor logs
+tail -f /var/log/myweb/application.log
+```
+
+Metrics to Monitor:
+  - Request count (RPM)
+  - Response time (avg, 95th, 99th percentile)
+  - Error rate
+  - CPU usage
+  - Memory usage
+  - Disk space
+  - Database connections
+
+### 11.3 Alerting
+
+Configure Alerts for:
+  - Application down/unreachable
+  - High error rate (> 1%)
+  - High response time (> 5s)
+  - High CPU usage (> 80%)
+  - High memory usage (> 85%)
+  - Database connection pool exhausted
+  - Disk space low (< 10%)
+
+================================================================================
+
+## 12. ROLLBACK PROCEDURES
+
+### 12.1 Immediate Rollback (First 30 minutes)
+
+If Critical Issues Detected:
+  1. Alert team immediately
+  2. Identify issue (logs, metrics)
+  3. Decide rollback vs fix forward
+
+### 12.2 Rollback to Previous Version
+
+Tomcat Rollback:
+```bash
+# Stop application
+/opt/tomcat/bin/shutdown.sh
+
+# Restore previous WAR file
+cp /backup/myweb-20260513-100000.war /opt/tomcat/webapps/myweb.war
+
+# Start application
+/opt/tomcat/bin/startup.sh
+
+# Verify
+curl https://prod.example.com/api/health
+```
+
+systemd Service Rollback:
+```bash
+# Stop application
+sudo systemctl stop myweb
+
+# Restore previous JAR
+cp /backup/myweb-1.0.0.jar /opt/myweb/app/
+
+# Start application
+sudo systemctl start myweb
+
+# Verify
+sudo systemctl status myweb
+```
+
+Kubernetes Rollback:
+```bash
+# View rollout history
+kubectl rollout history deployment/myweb -n myweb
+
+# Rollback to previous version
+kubectl rollout undo deployment/myweb -n myweb
+
+# Rollback to specific revision
+kubectl rollout undo deployment/myweb --to-revision=2 -n myweb
+
+# Verify rollback
+kubectl get pods -n myweb
+```
+
+### 12.3 Database Rollback
+
+If Database Schema Changes:
+```bash
+# Restore from backup
+psql -U myweb_user myweb < /backup/myweb-db-20260513-100000.sql
+
+# Or use Flyway/Liquibase rollback
+mvn flyway:undo
+```
+
+================================================================================
+
+## 13. TROUBLESHOOTING
+
+### 13.1 Common Deployment Issues
+
+Issue: Application Won't Start
+Solution:
+  - Check logs: tail -f /opt/tomcat/logs/catalina.out
+  - Check configuration files
+  - Verify database connectivity
+  - Check port availability
+  - Check file permissions
+
+Issue: Database Connection Failed
+Solution:
+  - Verify database is running
+  - Check connection string
+  - Verify credentials
+  - Check network connectivity
+  - Check firewall rules
+
+Issue: Out of Memory
+Solution:
+  - Increase heap size: -Xmx1024m
+  - Check memory leaks in application
+  - Increase server RAM
+  - Monitor garbage collection
+
+Issue: High Latency/Slow Response
+Solution:
+  - Check database query performance
+  - Check resource utilization
+  - Review application logs
+  - Check network latency
+  - Scale up resources
+
+### 13.2 Debugging Commands
+
+```bash
+# Check process
+ps aux | grep myweb
+
+# Check port listening
+netstat -tulpn | grep 8080
+lsof -i :8080
+
+# Check logs
+tail -500f /opt/tomcat/logs/catalina.out
+journalctl -u myweb -n 100 -f
+
+# Check disk space
+df -h
+
+# Check memory
+free -h
+
+# Check network
+ping -c 4 database-server
+telnet database-server 5432
+
+# Test API
+curl -v https://prod.example.com/api/health
+```
+
+================================================================================
+
+Document Version: 1.0
+Created: May 13, 2026
+Last Updated: May 13, 2026
+Purpose: Comprehensive Deployment Guide
+Status: Active
+
+================================================================================
